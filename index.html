@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>বгуড়ার মিঠাই - ডিজিটাল ক্যাশ মেমো ও টালি খাতা</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+/* DYNAMIC THEME SYSTEM INTERFACE */
+:root {
+  --primary: #5c1d24;
+  --secondary: #7f2d1b;
+  --accent: #b45309;
+  --success: #0f766e;
+  --danger: #991b1b;
+  --bg-main: #fcfbfa;
+  --card-bg: #ffffff;
+  --text-dark: #1c1917;
+  --text-muted: #6b7280;
+  --border-color: #f3efe9;
+  --radius-lg: 16px;
+  --radius-md: 10px;
+}
+
+body.theme-maroon { 
+  --primary: #5c1d24; --secondary: #7f2d1b; --accent: #b45309; --bg-main: #fcfbfa; --card-bg: #ffffff; --border-color: #ede7e3; 
+}
+body.theme-chocolate { 
+  --primary: #43281c; --secondary: #7f4f24; --accent: #b07d62; --bg-main: #faf7f2; --card-bg: #ffffff; --border-color: #ede0d4; 
+}
+body.theme-green { 
+  --primary: #143622; --secondary: #225c38; --accent: #705315; --bg-main: #f4f7f4; --card-bg: #ffffff; --border-color: #e1eae4; 
+}
+body.theme-blue { 
+  --primary: #0f1c3f; --secondary: #1d3557; --accent: #457b9d; --bg-main: #f1f5f9; --card-bg: #ffffff; --border-color: #e2e8f0; 
+}
+body.theme-royal-gold {
+  --primary: #cba358;       
+  --secondary: #b68f40;     
+  --accent: #dfba73;        
+  --bg-main: #121212;       
+  --card-bg: #1e1e1e;       
+  --text-dark: #f5f5f5;     
+  --text-muted: #a0a0a0;    
+  --border-color: #2d2d2d;  
+}
+
+*{ box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body{ font-family: 'Segoe UI', Roboto, -apple-system, sans-serif; background: var(--bg-main); color: var(--text-dark); padding-bottom: 90px; transition: background 0.3s ease, color 0.3s ease; }
+
+/* FULL WIDTH TOP HEADER */
+.header{
+  background: var(--card-bg); color: var(--text-dark); padding: 18px 15px; display: flex; align-items: center; gap: 12px;
+  position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.03); border-bottom: 1px solid var(--border-color);
+}
+.back-btn{ font-size: 16px; cursor: pointer; background: var(--bg-main); width: 34px; height: 34px; display: none; align-items: center; justify-content: center; border-radius: 50%; color: var(--text-dark); border: 1px solid var(--border-color); }
+#title{ font-size: 17px; font-weight: 700; color: var(--primary); transition: color 0.3s ease; }
+
+/* FULL WIDTH DASHBOARD & CARDS */
+.analytics-container { padding: 15px 15px 5px 15px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.stat-box { background: var(--card-bg); padding: 15px 12px; border-radius: var(--radius-md); box-shadow: 0 4px 15px rgba(0,0,0,0.01); border: 1px solid var(--border-color); position: relative; overflow: hidden; }
+.stat-box::before { content:''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
+.stat-box.highlight::before { background: var(--danger); }
+.stat-box.success-highlight::before { background: var(--success); }
+.stat-label { font-size: 11px; color: var(--text-muted); font-weight: 700; margin-bottom: 4px; }
+.stat-value { font-size: 18px; font-weight: 800; color: var(--text-dark); }
+
+.dashboard{ padding: 10px 15px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.folder{
+  background: var(--card-bg); padding: 20px 12px; border-radius: var(--radius-lg); box-shadow: 0 4px 15px rgba(0,0,0,.01);
+  text-align: center; font-weight: 700; cursor: pointer; transition: all .2s ease; display: flex;
+  flex-direction: column; align-items: center; justify-content: center; border: 1px solid var(--border-color); font-size: 13px; color: var(--text-dark);
+}
+.folder span { font-size: 22px; margin-bottom: 8px; background: var(--bg-main); width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 12px; color: var(--primary); transition: all 0.3s ease; border: 1px solid var(--border-color); }
+.folder:active { transform: scale(0.96); background: var(--bg-main); }
+
+/* PAGES & COMPONENT STYLING */
+.page{ display:none; padding: 15px; animation: fadeIn 0.2s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: translateY(0); } }
+
+.form-card{ background: var(--card-bg); padding: 15px; border-radius: var(--radius-lg); box-shadow: 0 4px 20px rgba(0,0,0,0.01); border: 1px solid var(--border-color); margin-bottom: 15px; width: 100%; }
+.form-group { margin-bottom: 14px; position: relative; }
+.form-group label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px; color: var(--text-dark); opacity: 0.9; }
+.form-card input, .form-card select, .form-card textarea{
+  width: 100%; padding: 11px 12px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 14px; outline: none; background: var(--bg-main); color: var(--text-dark); transition: all 0.2s;
+}
+.form-card input:focus, .form-card select:focus{ border-color: var(--primary); background: var(--card-bg); }
+
+.checkbox-group { display: flex; align-items: center; gap: 8px; background: #fffbeb; padding: 12px; border-radius: var(--radius-md); border: 1px dashed #f59e0b; margin-bottom: 14px; }
+body.theme-royal-gold .checkbox-group { background: #2a2415; border-color: var(--primary); }
+.checkbox-group input { width: auto; transform: scale(1.1); cursor: pointer; }
+.checkbox-group label { font-weight: 700; color: #b45309; cursor: pointer; margin: 0; font-size: 12px; }
+body.theme-royal-gold .checkbox-group label { color: var(--primary); }
+
+.suggestions-list {
+  position: absolute; top: 100%; left: 0; right: 0; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); z-index: 1000; max-height: 180px; overflow-y: auto; box-shadow: 0 8px 20px rgba(0,0,0,0.05); display: none; margin-top: 2px;
+}
+.suggestion-item { padding: 10px 12px; cursor: pointer; font-size: 13px; border-bottom: 1px solid var(--bg-main); }
+.suggestion-item:hover { background: var(--bg-main); color: var(--primary); }
+
+.btn{
+  background: var(--secondary); color: #fff; border: none; border-radius: var(--radius-md); padding: 10px 15px; cursor: pointer; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; justify-content: center; transition: background 0.2s;
+}
+.btn.primary { background: var(--primary); color: #000; } 
+body.theme-royal-gold .btn.primary { color: #000; }
+.btn.danger{ background: var(--danger); color: #fff; }
+.btn.success { background: var(--success); color: #fff; }
+.btn.full-width { width: 100%; padding: 12px; font-size: 14px; margin-top: 10px; }
+
+/* TABLES & INTERFACES */
+.invoice-items-table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 12px; }
+.invoice-items-table th { background: var(--bg-main); text-align: left; padding: 10px 4px; font-weight: 700; border-bottom: 2px solid var(--border-color); color: var(--text-dark); }
+.invoice-items-table td { padding: 6px 2px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+
+.inv-item-select, .custom-item-name {
+  padding: 6px 3px !important;
+  width: 100%;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--text-dark);
+  font-size: 11px !important; 
+  max-width: 110px; 
+}
+
+.live-breakdown-panel { margin-top: 15px; padding: 14px; background: var(--bg-main); border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 13px; }
+.live-breakdown-title { font-weight: 700; color: var(--primary); border-bottom: 1px solid var(--border-color); padding-bottom: 6px; margin-bottom: 10px; transition: color 0.3s; }
+.live-breakdown-row { display: flex; justify-content: space-between; padding: 4px 0; }
+
+/* DYNAMIC PREMIUM MEMO DESIGN */
+.memo-preview-wrap { 
+  display: none; width: 100%; background: #ffffff; padding: 20px 12px; border: 3px double var(--primary); color: #000; position: relative; border-radius: 4px; margin-top: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); transition: border-color 0.3s ease;
+}
+body.theme-royal-gold .memo-preview-wrap { background: #1e1e1e; color: #fff; border-color: var(--primary); }
+.memo-brand-header { border-bottom: 2px solid var(--primary); padding-bottom: 12px; margin-bottom: 15px; text-align: center; transition: border-color 0.3s; }
+.memo-title-main { font-size: 26px; font-weight: 900; color: var(--primary); text-align: center; margin-bottom: 2px; transition: color 0.3s; }
+.memo-sub-text { font-size: 11px; text-align: center; color: #333; line-height: 1.5; }
+body.theme-royal-gold .memo-sub-text { color: #ccc; }
+.memo-badge-title { display: inline-block; background: var(--primary); color: #fff; padding: 4px 14px; font-size: 11px; font-weight: bold; border-radius: 4px; margin-top: 6px; transition: background 0.3s; }
+body.theme-royal-gold .memo-badge-title { color: #000; }
+
+.memo-meta-grid { display: grid; grid-template-columns: repeat(2, 1fr); font-size: 12px; margin-bottom: 15px; background: var(--bg-main); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); line-height: 1.6; }
+.memo-meta-grid b { color: var(--primary); transition: color 0.3s; }
+
+.memo-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 15px; }
+.memo-table th { background: var(--primary); color: #fff; font-weight: 700; padding: 8px; text-align: left; border: 1px solid var(--primary); transition: background 0.3s, border-color 0.3s; }
+body.theme-royal-gold .memo-table th { color: #000; }
+.memo-table td { border: 1px solid var(--border-color); padding: 8px; text-align: left; color: #111; }
+body.theme-royal-gold .memo-table td { color: #eee; }
+.memo-table tbody tr { cursor: pointer; transition: background 0.2s; }
+.memo-table tbody tr:hover { background-color: #fef08a !important; }
+body.theme-royal-gold .memo-table tbody tr:hover { background-color: #3a321d !important; }
+.memo-table tr:nth-child(even) { background-color: var(--bg-main); }
+
+.memo-summary-block { display: flex; flex-direction: column; align-items: flex-end; font-size: 12px; gap: 6px; margin-bottom: 20px; }
+.memo-summary-row { display: flex; justify-content: space-between; width: 210px; color: #333; border-bottom: 1px dashed var(--border-color); padding-bottom: 2px; }
+body.theme-royal-gold .memo-summary-row { color: #ccc; }
+.memo-summary-row.grand-total { border-top: 2px solid var(--primary); border-bottom: 2px double var(--primary); padding: 6px 0; font-size: 14px; font-weight: 900; color: var(--primary); width: 230px; transition: border-color 0.3s, color 0.3s; }
+
+.memo-footer-split { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: 20px; }
+.memo-signature-space { text-align: center; font-size: 11px; font-weight: 700; color: #333; border-top: 1px dashed #000; width: 110px; padding-top: 4px; margin-top: 25px; }
+body.theme-royal-gold .memo-signature-space { color: #ccc; border-top-color: #fff; }
+
+/* KASTAMAR CARD WORKSPACE */
+.customer-card { background: var(--card-bg); border-radius: var(--radius-lg); padding: 15px; margin-bottom: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.01); cursor: pointer; }
+.card-header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 8px; }
+.baki-tag { background: #fee2e2; color: var(--danger); padding: 4px 10px; border-radius: 30px; font-size: 11px; font-weight: 800; }
+body.theme-royal-gold .baki-tag { background: #421d1d; }
+.baki-tag.paid { background: #ccfbf1; color: var(--success); }
+body.theme-royal-gold .baki-tag.paid { background: #143530; }
+
+.action-expansion-panel { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color); animation: slideDown 0.25s ease-out; }
+@keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+.action-btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.act-btn { padding: 8px 4px; border-radius: var(--radius-md); border: none; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; background: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-dark); }
+.act-btn.highlight-cash { background: #f0fdf4; color: var(--success); border-color: #bbf7d0; }
+body.theme-royal-gold .act-btn.highlight-cash { background: #143520; color: #4ade80; border-color: #22c55e; }
+.act-btn.highlight-history { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+body.theme-royal-gold .act-btn.highlight-history { background: #172554; color: #60a5fa; border-color: #3b82f6; }
+
+.management-options-box { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; background: var(--bg-main); padding: 8px; border-radius: var(--radius-md); border: 1px dashed var(--border-color); margin-top: 8px; }
+.mgmt-sub-btn { padding: 6px; font-size: 10px; font-weight: 700; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; text-align: center; color: var(--text-dark); }
+
+.history-panel { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 10px; margin-top: 8px; }
+.history-item { font-size: 12px; padding: 8px 0; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; color: var(--text-dark); opacity: 0.9; }
+.history-item:last-child { border-bottom: none; }
+.history-actions { display: flex; gap: 4px; }
+.hist-btn { border: none; background: var(--card-bg); border: 1px solid var(--border-color); padding: 2px 6px; border-radius: 4px; font-size: 10px; cursor: pointer; color: var(--text-dark); }
+
+/* FIXED NAV BAR */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 2000; align-items: center; justify-content: center; padding: 15px; backdrop-filter: blur(3px); }
+.modal-content { background: var(--card-bg); border-radius: var(--radius-lg); padding: 20px; width: 100%; max-width: 360px; border: 1px solid var(--border-color); }
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 65px; background: var(--card-bg); display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.03); border-top: 1px solid var(--border-color); z-index: 999; }
+.nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 10px; font-weight: 700; cursor: pointer; width: 18%; gap: 2px; }
+.nav-item span { font-size: 18px; color: #9ca3af; transition: color 0.2s; }
+.nav-item.active { color: var(--primary); }
+.nav-item.active span { color: var(--primary); }
+
+/* 2 BUTTONS SYSTEM SECTION */
+.share-buttons-container {
+  display: flex; gap: 10px; margin-top: 15px;
+}
+.share-buttons-container .btn { flex: 1; padding: 12px 10px; font-size: 13px; }
+</style>
+</head>
+<body class="theme-maroon" id="appBody">
+
+<div class="header">
+  <div class="back-btn" id="backBtn" onclick="goHome()">⬅</div>
+  <span id="title">বগুড়ার মিঠাই - কন্ট্রোল প্যানেল</span>
+</div>
+
+<div id="topAnalytics" class="analytics-container">
+  <div class="stat-box highlight">
+    <div class="stat-label">🔴 মোট বকেয়া বাকি খাতা</div>
+    <div class="stat-value"><span id="dashTotalBaki">0</span> ৳</div>
+  </div>
+  <div class="stat-box success-highlight">
+    <div class="stat-label">🟢 রেজিস্টার্ড কাস্টমার</div>
+    <div class="stat-value"><span id="dashTotalCust">0</span> জন</div>
+  </div>
+</div>
+
+<div id="dashboard" class="dashboard">
+  <div class="folder" onclick="openPage('list','👥 কাস্টমার খাতা তালিকা')"><span>👥</span>কাস্টমার খাতা</div>
+  <div class="folder" onclick="openPage('invoice','📄 ডিজিটাল ক্যাশ মেমো')"><span>📄</span>ক্যাশ মেমো</div>
+  <div class="folder" onclick="openPage('liveCollections','📊 দৈনিক কালেকশন খাতা')"><span>📊</span>আজকের কালেকশন</div>
+  <div class="folder" onclick="openPage('bakiCollections','🔴 বকেয়া কালেকশন (আজকের বাকি)')"><span>🔴</span>আজকের বাকি তালিকা</div>
+  <div class="folder" onclick="openPage('tagadaPage','💬 তাগাদা খাতা তালিকা')"><span>💬</span>তাগাদা খাতা</div>
+  <div class="folder" onclick="openPage('unpaid','⚠️ বকেয়া বাকি তালিকা')"><span>⚠️</span>বাকি আছে</div>
+  <div class="folder" onclick="openPage('add','➕ নতুন এন্ট্রি ফরম')"><span>➕</span>নতুন কাস্টমার</div>
+  <div class="folder" onclick="openPage('themePanel','🎨 কালার থিম চেঞ্জার')"><span>🎨</span>কালার থিম</div>
+</div>
+
+<div id="list" class="page">
+  <div style="margin-bottom:12px;"><input type="text" id="searchCustomer" class="form-card" style="margin:0;" placeholder="🔍 খদ্দের খুঁজুন (নাম বা মোবাইল নম্বর)..." onkeyup="searchCustomer()"></div>
+  <div id="customerLayout"></div>
+</div>
+
+<div id="itemsConfig" class="page">
+  <div class="form-card">
+    <h3 style="color: var(--primary); margin-bottom: 12px; font-size:14px;" id="itemFormTitle">📦 নতুন মিষ্টি ও দই আইটেম যোগ করুন</h3>
+    <input type="hidden" id="editingItemId">
+    <div class="form-group"><label>মিষ্টির নাম/বিবরণ *</label><input type="text" id="setupItemName" placeholder="যেমন: স্পেশাল শাহি দই (কেজি)"></div>
+    <div class="form-group"><label>নির্ধারিত রেট/দাম (টাকা) *</label><input type="number" id="setupItemPrice" placeholder="যেমন: ৩২০"></div>
+    <div style="display:flex; gap:8px;">
+      <button class="btn primary" style="flex:1;" onclick="saveConfiguredItem()">💾 আইটেম সেভ করুন</button>
+      <button class="btn danger" id="btnCancelItemEdit" style="display:none;" onclick="resetItemSetupForm()">বাতিল</button>
+    </div>
+  </div>
+  <h3 style="margin: 12px 0; font-size:13px; color:var(--text-muted);">📋 বর্তমানে সচল আইটেম ও প্রাইস লিস্ট</h3>
+  <div id="configuredItemsListContainer"></div>
+</div>
+
+<div id="unpaid" class="page">
+  <div id="unpaidLayout"></div>
+</div>
+
+<div id="bakiCollections" class="page">
+  <div class="form-card">
+    <label style="font-weight:700; font-size:12px; margin-bottom:6px; display:block;">📅 বাকি ফিল্টারের তারিখ নির্বাচন করুন:</label>
+    <input type="date" id="bakiSearchDate" onchange="renderBakiCollectionReport()">
+  </div>
+  <h3 style="margin-bottom:12px; font-size:14px; color:var(--danger);" id="bakiReportTitle">আজকের নতুন বাকির তালিকা</h3>
+  <div id="bakiCollectionsLayout"></div>
+</div>
+
+<div id="tagadaPage" class="page">
+  <h3 style="margin-bottom:12px; font-size:14px; color:var(--primary);">💬 বকেয়া টাকা আদায়ের তাগাদা খাতা</h3>
+  <div id="tagadaLayout"></div>
+</div>
+
+<div id="add" class="page">
+  <div class="form-card">
+    <h3 id="customerFormTitle" style="font-size:15px; color:var(--primary); margin-bottom:12px;">নতুন কাস্টমার খাতা</h3>
+    <input type="hidden" id="editingCustomerId">
+    <div class="form-group"><label>👑 👑 ক্রেতা/ডিলারের নাম *</label><input id="nameInput" type="text" placeholder="কাস্টমারের নাম"></div>
+    <div class="form-group"><label>📍 ঠিকানা</label><input id="addressInput" type="text" value="শেরপুর, বগুড়া"></div>
+    <div class="form-group"><label>📱 মোবাইল নম্বর</label><input id="mobileInput" type="number" placeholder="১১ ডিজিটের মোবাইল নম্বর"></div>
+    <div class="form-group"><label>💵 মোট </label><input id="totalInput" type="number" value="0"></div>
+    <div class="form-group" id="paidGroup"><label>💵 জমা (টাকা)</label><input id="paidInput" type="number" value="0"></div>
+    <div class="form-group"><label> 📅 তারিখ *</label><input id="custOpeningDate" type="date"></div>
+    <div style="display:flex; gap:8px; margin-top: 10px;">
+      <button class="btn primary" style="flex:1;" onclick="saveCustomer()">💾 সেভ খাতা</button>
+      <button class="btn danger" id="btnCancelCustEdit" style="display:none;" onclick="resetCustomerForm()">বাতিল</button>
+    </div>
+  </div>
+</div>
+
+<div id="invoice" class="page">
+  <div class="form-card">
+    <h3 style="margin-bottom:15px; color: var(--primary); font-size:15px; font-weight:800; border-bottom:2px solid var(--border-color); padding-bottom:6px;">📄 অর্ডার তথ্য এন্ট্রি</h3>
+    <input type="hidden" id="editingInvoiceId">
+
+    <div class="form-group">
+      <label> 👑 ক্রেতার নাম *</label>
+      <input id="invCustomerName" type="text" placeholder="ক্রেতার নাম লিখুন..." oninput="handleCustomerAutocomplete(this)" autocomplete="off">
+      <div id="autocompleteWrapper" class="suggestions-list"></div>
+    </div>
+    
+    <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:10px;">
+      <div class="form-group"><label>📱 মোবাইল নম্বর</label><input id="invCustomerMobile" type="number" placeholder="মোবাইল নম্বর"></div>
+      <div class="form-group"><label>📍 ঠিকানা</label><input id="invCustomerAddress" type="text" value="শেরপুর, বগুড়া"></div>
+    </div>
+    <div class="form-group"><label> 📅 তারিখ</label><input id="invDate" type="date"></div>
+
+    <div class="form-group" style="background: var(--bg-main); padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-top: 15px;">
+      <label style="color: var(--primary); font-weight:800;">📦 কুইক আইটেম সিলেক্টর</label>
+      <select id="invoiceItemQuickSelector" onchange="handleQuickItemSelection(this)" style="background: var(--card-bg); font-weight:600;"></select>
+    </div>
+
+    <h4 style="margin: 15px 0 5px 0; font-size:13px; font-weight:700;">পণ্য তালিকা</h4>
+    
+    <table class="invoice-items-table">
+      <thead>
+        <tr>
+          <th>নাম</th>
+          <th style="width: 55px; text-align:center;">পরিমাণ</th>
+          <th style="width: 65px;">দর (৳)</th>
+          <th style="width: 60px; text-align:right;">মোট</th>
+          <th style="width: 35px; text-align:center;">বাদ</th>
+        </tr>
+      </thead>
+      <tbody id="invoiceItemRows"></tbody>
+    </table>
+
+    <div style="display:flex; gap:8px; margin-top:12px;">
+      <button class="btn" style="background:var(--bg-main); color:var(--text-dark); padding:6px 10px; font-size:12px; border: 1px solid var(--border-color);" onclick="addInvoiceItemRow('', 0, false)">➕ আইটেম লিস্ট </button>
+      <button class="btn" style="background:var(--bg-main); color:var(--text-dark); padding:6px 10px; font-size:12px; border: 1px solid var(--border-color);" onclick="addInvoiceItemRow('', 0, true)">✍️ কাস্টম প্রোডাক্ট</button>
+    </div>
+
+    <h4 style="margin: 20px 0 6px 0; font-size:13px; font-weight:700;"></h4>
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 12px;">
+      <div class="form-group" style="margin:0;"><label>🚌 বাস ভাড়া</label><input type="number" id="invBusFare" value="0" min="0" oninput="calculateInvoiceTotal()"></div>
+      <div class="form-group" style="margin:0;">
+        <label>📱পেমেন্ট চার্জ</label>
+        <select id="invGatewaySelect" onchange="calculateInvoiceTotal()">
+          <option value="none" data-rate="0">চার্জ নেই</option>
+          <option value="বিকাশ" data-rate="0.015">বিকাশ</option>
+          <option value="নগদ" data-rate="0.012">নগদ</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="checkbox-group">
+      <input type="checkbox" id="chkAddToBaki" onchange="calculateInvoiceTotal()">
+      <label for="chkAddToBaki">🔴 খাতায় যোগ করুন</label>
+    </div>
+
+    <div class="live-breakdown-panel">
+      <div class="live-breakdown-title">📋 লাইভ বিল সামারি</div>
+      <div class="live-breakdown-row"><span>পণ্য সামগ্রীর মূল্য:</span><span><span id="invItemSubtotal">0</span> ৳</span></div>
+      <div class="live-breakdown-row"><span>🚌 বাস ভাড়া</span><span>+ <span id="lblBusFareText">0</span> ৳</span></div>
+      <div class="live-breakdown-row"><span>📱খরচ</span><span>+ <span id="lblGatewayText">0</span> ৳</span></div>
+      <div class="live-breakdown-row" style="color:var(--danger); font-weight:700;"><span>🔴 পূর্বের বকেয়া বাকি:</span><span>+ <span id="lblPrevDueText">0</span> ৳</span></div>
+      <div class="live-breakdown-row" style="border-top:1px solid var(--border-color); margin-top:6px; padding-top:6px; font-size:15px; font-weight:800; color:var(--primary);">
+        <span>💵 সর্বমোট প্রদেয় বিল:</span><span><span id="invGrandTotal">0</span> ৳</span>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:10px;">
+      <button class="btn primary full-width" id="btnGenerateInvoice" onclick="buildAndShowMemo()">🛠️ মেমো জেনারেট করুন</button>
+      <button class="btn danger" id="btnCancelInvoiceEdit" style="display:none; margin-top:10px;" onclick="resetInvoiceForm()">বাতিল</button>
+    </div>
+  </div>
+
+  <div id="memoPreviewBlock" class="memo-preview-wrap">
+    <div class="memo-brand-header">
+      <div class="memo-title-main">বগুড়ার মিঠাই</div>
+      <div class="memo-sub-text">
+        স্বাদ ও ঐতিহ্যে অনন্য — খাঁটি বগুড়ার শাহি দই, প্রিমিয়াম মিষ্টি ও ঘি বিক্রেতা<br>
+        📍 শেরুয়া বটতলা, শেরপুর, বগুড়া। 📱 মোবাইল: ০১৭৫৮-০৭৪৪৫৬
+      </div>
+      <div class="memo-badge-title">ক্যাশ মেমো</div>
+    </div>
+    
+    <div class="memo-meta-grid">
+      <div><b>ক্রেতার নাম:</b> <span id="lblMemoName">-</span><br><b>ঠিকানা:</b> <span id="lblMemoAddress">-</span><br><b>মোবাইল:</b> <span id="lblMemoMobile">-</span></div>
+      <div style="text-align:right;"><b>তারিখ:</b> <span id="lblMemoDate">-</span><br><b>মেমো নং:</b> <span id="lblMemoId">-</span></div>
+    </div>
+
+    <table class="memo-table">
+      <thead>
+        <tr>
+          <th> নাম </th>
+          <th style="width:50px; text-align:center;">পরিমাণ</th>
+          <th style="width:70px; text-align:right;">দর (৳)</th>
+          <th style="width:80px; text-align:right;">মোট মূল্য</th>
+        </tr>
+      </thead>
+      <tbody id="lblMemoRows"></tbody>
+    </table>
+
+    <div class="memo-summary-block">
+      <div class="memo-summary-row"><span>আইটেম মূল্য:</span><span><span id="lblMemoSubtotal">0</span> ৳</span></div>
+      <div class="memo-summary-row" id="memoBusFareRow" style="display:none;"><span>বাস ভাড়া</span><span>+ <span id="lblMemoBusFare">0</span> ৳</span></div>
+      <div class="memo-summary-row" id="memoGatewayRow" style="display:none;"><span>📱 <span id="lblMemoGatewayName">গেটওয়ে</span> চার্জ:</span><span>+ <span id="lblMemoGateway">0</span> ৳</span></div>
+      <div class="memo-summary-row" id="memoPrevDueRow" style="display:none; color:var(--danger); font-weight:700;"><span>🔴 পূর্বের বকেয়া বাকি খাতা:</span><span>+ <span id="lblMemoPrevDue">0</span> ৳</span></div>
+      <div class="memo-summary-row grand-total"><span>💵 সর্বমোট প্রদেয় টাকা:</span><span><span id="lblMemoGrand">0</span> ৳</span></div>
+    </div>
+
+    <div class="memo-footer-split">
+      <div style="font-size:10px; color:var(--text-muted);">
+        <div id="memoQrCode" style="margin-bottom:4px; background: #fff; padding: 3px; display: inline-block; border-radius: 4px;"></div><br>
+        <i>বগুড়ার মিঠাই সিস্টেম কোড।</i>
+      </div>
+      <div class="memo-signature-space">বিক্রেতার স্বাক্ষর</div>
+    </div>
+  </div>
+  
+  <div id="shareButtonsArea" class="share-buttons-container" style="display:none;">
+    <button class="btn success" style="background:#25D366;" onclick="sendMemoAsTextWhatsapp()">💬 WhatsApp Direct Send</button>
+    <button class="btn primary" style="background:#0284c7; color:#fff;" onclick="downloadMemoAsImageOnly()">🖼️ Download Memo Image</button>
+  </div>
+
+  <h3 style="margin: 25px 0 12px 0; font-size:15px; color:var(--primary); font-weight:800; border-bottom: 2px solid var(--border-color); padding-bottom: 5px;">📜 জেনারেটকৃত মেমো হিস্ট্রি লগ</h3>
+  <div id="invoiceHistoryLayout"></div>
+</div>
+
+<div id="liveCollections" class="page">
+  <div class="form-card">
+    <label style="font-weight:700; font-size:12px; margin-bottom:6px; display:block;">📅 কালেকশন দেখার তারিখ নির্বাচন করুন:</label>
+    <input type="date" id="collectionSearchDate" onchange="renderDailyCollectionReport()">
+  </div>
+  <h3 style="margin-bottom:12px; font-size:14px; color:var(--primary);" id="collReportTitle">আজকের কালেকশন রিপোর্ট</h3>
+  <div id="dailyCollectionsLayout"></div>
+</div>
+
+<div id="themePanel" class="page">
+  <div class="form-card" style="text-align:center;">
+    <h3 style="color:var(--primary); margin-bottom:8px; font-size:15px;">🎨 অ্যাপের কালার থিম পরিবর্তন করুন</h3>
+    <p style="font-size:12px; color:var(--text-muted); margin-bottom:15px;">যেকোনো একটি থিমে ক্লিক করলে অ্যাপের সব ডিজাইন এবং জেনারেট করা মেমোর বর্ডার কালার সাথে সাথে পাল্টে যাবে।</p>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <button class="btn primary" style="background:#cba358; color:#000; border:2px solid #fff;" onclick="changeAppTheme('theme-royal-gold')">✨ প্রিমিয়াম শাহী গোল্ড (ছবির মতো)</button>
+      <button class="btn primary" style="background:#5c1d24; color:#fff; border:2px solid #fff;" onclick="changeAppTheme('theme-maroon')">👑 রয়্যাল ম্যারুন (ডিফল্ট)</button>
+      <button class="btn primary" style="background:#43281c; color:#fff; border:2px solid #fff;" onclick="changeAppTheme('theme-chocolate')">🍫 লাক্সারি চকোলেট</button>
+      <button class="btn primary" style="background:#143622; color:#fff; border:2px solid #fff;" onclick="changeAppTheme('theme-green')">🟢 রয়্যাল গ্রিন</button>
+      <button class="btn primary" style="background:#0f1c3f; color:#fff; border:2px solid #fff;" onclick="changeAppTheme('theme-blue')">🔵 ডার্ক ক্লাসিক ব্লু</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="collectionModal">
+  <div class="modal-content">
+    <div style="text-align:center; margin-bottom:12px;"><span style="font-size:28px;">💵</span><h3 style="color:var(--primary); font-size:15px;">জমা ফর্ম</h3></div>
+    <input type="hidden" id="modalCustId">
+    <div class="form-group"><label>কাস্টমারের নাম</label><input type="text" id="modalCustName" readonly style="font-weight:700;"></div>
+    <div class="form-group"><label>জমার তারিখ *</label><input type="date" id="modalCollDate"></div>
+    <div class="form-group"><label>জমা</label><input type="number" id="modalCollAmount" style="font-size:16px; font-weight:700;"></div>
+    <div style="display:flex; gap:8px; margin-top:15px;">
+      <button class="btn success" style="flex:1;" onclick="submitBakiMoneyModal()">💾 জমা নিশ্চিত করুন</button>
+      <button class="btn danger" onclick="closeCollectionModal()">বাতিল</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="historyEditModal">
+  <div class="modal-content">
+    <div style="text-align:center; margin-bottom:12px;"><span style="font-size:28px;">📝</span><h3 style="color:var(--primary); font-size:15px;">লেনদেন বিবরণী সংশোধন</h3></div>
+    <input type="hidden" id="histEditCustId">
+    <input type="hidden" id="histEditIndex">
+    <div class="form-group"><label>বিবরণী নোট (টেক্সট) *</label><input type="text" id="histEditNote"></div>
+    <div class="form-group"><label>টাকার পরিমাণ</label><input type="number" id="histEditAmount"></div>
+    <div style="display:flex; gap:8px; margin-top:15px;">
+      <button class="btn primary" style="flex:1;" onclick="submitEditedHistory()">💾 সংশোধন করুন</button>
+      <button class="btn danger" onclick="document.getElementById('historyEditModal').style.display='none'">বাতিল</button>
+    </div>
+  </div>
+</div>
+
+<div id="printStatementArea" style="display:none; padding:30px; background:#fff;"></div>
+
+<div class="bottom-nav">
+  <div class="nav-item active" id="navHome" onclick="goHome()"><span>🏠</span>ড্যাশবোর্ড</div>
+  <div class="nav-item" onclick="openPage('list','👥 কাস্টমার খাতা')"><span>👥</span>খাতা</div>
+  <div class="nav-item" onclick="openPage('invoice','📄 ডিজিটাল ক্যাশ মেমো')"><span>📄</span>মেমো</div>
+  <div class="nav-item" onclick="openPage('liveCollections','📊 দৈনিক কালেকশন')"><span>📊</span>কালেকশন</div>
+  <div class="nav-item" onclick="openPage('itemsConfig','📦 আইটেম সেটআপ')"><span>📦</span>আইটেম সেটআপ</div>
+</div>
+
+<script>
+let customers = JSON.parse(localStorage.getItem("premium_tali_customers")) || [];
+let configuredItems = JSON.parse(localStorage.getItem("bm_configured_items")) || [
+  { id: 1, name: "বগুড়ার স্পেশাল শাহি দই (কেজি)", price: 320 },
+  { id: 2, name: "প্রিমিয়াম কাপ দই (পিস)", price: 50 },
+  { id: 3, name: "স্পেশাল ক্ষীরসা রসকদম (কেজি)", price: 380 },
+  { id: 4, name: "ঐতিহ্যবাহী রাজভোগ রসগোল্লা (কেজি)", price: 280 }
+];
+let invoiceHistory = JSON.parse(localStorage.getItem("bm_invoice_history")) || [];
+
+let selectedCustomerDue = 0;
+const todayStr = new Date().toISOString().split("T")[0];
+
+document.getElementById("invDate").value = todayStr;
+document.getElementById("custOpeningDate").value = todayStr;
+document.getElementById("collectionSearchDate").value = todayStr;
+document.getElementById("bakiSearchDate").value = todayStr;
+
+let activeTheme = localStorage.getItem("bm_app_theme") || "theme-royal-gold";
+document.body.className = activeTheme;
+
+const dashboard = document.getElementById("dashboard");
+const backBtn = document.getElementById("backBtn");
+const titleEl = document.getElementById("title");
+const topAnalytics = document.getElementById("topAnalytics");
+
+updateLiveCounters();
+
+function changeAppTheme(themeName) {
+  document.body.className = themeName;
+  localStorage.setItem("bm_app_theme", themeName);
+}
+
+function goHome() {
+  dashboard.style.display = "grid"; topAnalytics.style.display = "grid";
+  document.querySelectorAll(".page").forEach(p => p.style.display = "none");
+  titleEl.innerText = "বগুড়ার মিঠাই -  কন্ট্রোল প্যানেল"; backBtn.style.display = "none";
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+  document.getElementById("navHome").classList.add("active");
+  updateLiveCounters();
+}
+
+function openPage(id, titleText) {
+  dashboard.style.display = "none"; topAnalytics.style.display = "none";
+  document.querySelectorAll(".page").forEach(p => p.style.display = "none");
+  document.getElementById(id).style.display = "block";
+  titleEl.innerText = titleText; backBtn.style.display = "flex";
+  
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+  
+  if(id === "list") loadCustomerCards(customers, "customerLayout");
+  if(id === "unpaid") loadCustomerCards(customers.filter(c => c.remaining > 0), "unpaidLayout");
+  if(id === "itemsConfig") renderConfiguredItemsList();
+  if(id === "invoice") initInvoiceForm();
+  if(id === "liveCollections") renderDailyCollectionReport();
+  if(id === "bakiCollections") renderBakiCollectionReport();
+  if(id === "tagadaPage") renderTagadaList();
+}
+
+function updateLiveCounters() {
+  let totalBaki = 0;
+  customers.forEach(c => { if(c.remaining > 0) totalBaki += c.remaining; });
+  document.getElementById("dashTotalBaki").innerText = totalBaki.toLocaleString('bn-BD');
+  document.getElementById("dashTotalCust").innerText = customers.length.toLocaleString('bn-BD');
+}
+
+function convertToBanglaDate(dateString) {
+  if(!dateString) return "";
+  const [year, month, day] = dateString.split('-');
+  return `${day}/${month}/${year}`;
+}
+
+function searchCustomer() {
+  const query = document.getElementById("searchCustomer").value.toLowerCase();
+  const filtered = customers.filter(c => c.name.toLowerCase().includes(query) || (c.mobile && c.mobile.includes(query)));
+  loadCustomerCards(filtered, "customerLayout");
+}
+
+function handleCustomerAutocomplete(inputEl) {
+  const text = inputEl.value.toLowerCase();
+  const wrapper = document.getElementById("autocompleteWrapper");
+  wrapper.innerHTML = "";
+  
+  if(!text) { wrapper.style.display = "none"; selectedCustomerDue = 0; calculateInvoiceTotal(); return; }
+  const matches = customers.filter(c => c.name.toLowerCase().includes(text));
+  if(matches.length === 0) { wrapper.style.display = "none"; return; }
+  
+  wrapper.style.display = "block";
+  matches.forEach(c => {
+    const div = document.createElement("div");
+    div.className = "suggestion-item";
+    div.innerHTML = `👤 <b>${c.name}</b> (${c.mobile || 'নেই'}) - <span style="color:var(--danger); font-weight:700;">বাকি: ${c.remaining}৳</span>`;
+    div.onclick = function() {
+      document.getElementById("invCustomerName").value = c.name;
+      document.getElementById("invCustomerMobile").value = c.mobile || "";
+      document.getElementById("invCustomerAddress").value = c.address || "শেরপুর, বগুড়া";
+      selectedCustomerDue = c.remaining;
+      wrapper.style.display = "none";
+      calculateInvoiceTotal();
+    };
+    wrapper.appendChild(div);
+  });
+}
+
+document.addEventListener("click", function(e) {
+  if(e.target.id !== "invCustomerName") {
+    document.getElementById("autocompleteWrapper").style.display = "none";
+  }
+});
+
+function toggleActionExpansionPanel(id, event) {
+  if (event.target.closest('.action-expansion-panel') || event.target.tagName.toLowerCase() === 'button' || event.target.closest('.history-actions')) return;
+  const panel = document.getElementById(`action_panel_${id}`);
+  if(panel) {
+    const isVisible = panel.style.display === "block";
+    document.querySelectorAll('.action-expansion-panel').forEach(p => p.style.display = "none");
+    panel.style.display = isVisible ? "none" : "block";
+  }
+}
+
+function toggleHistorySubView(id) {
+  const panel = document.getElementById(`history_box_${id}`);
+  if(panel) panel.style.display = panel.style.display === "block" ? "none" : "block";
+}
+
+function toggleManagementSubView(id) {
+  const panel = document.getElementById(`mgmt_box_${id}`);
+  if(panel) panel.style.display = panel.style.display === "block" ? "none" : "block";
+}
+
+function openEditHistoryModal(custId, index) {
+  const c = customers.find(x => x.id == custId);
+  if(!c || !c.history[index]) return;
+  document.getElementById("histEditCustId").value = custId;
+  document.getElementById("histEditIndex").value = index;
+  document.getElementById("histEditNote").value = c.history[index].note;
+  document.getElementById("histEditAmount").value = c.history[index].amount || 0;
+  document.getElementById("historyEditModal").style.display = "flex";
+}
+
+function submitEditedHistory() {
+  const custId = document.getElementById("histEditCustId").value;
+  const index = document.getElementById("histEditIndex").value;
+  const newNote = document.getElementById("histEditNote").value.trim();
+  const newAmount = parseInt(document.getElementById("histEditAmount").value) || 0;
+  
+  if(!newNote) { alert("বিবরণ দিন!"); return; }
+  const c = customers.find(x => x.id == custId);
+  if(!c || !c.history[index]) return;
+  
+  c.history[index].note = newNote;
+  if(c.history[index].amount !== undefined) c.history[index].amount = newAmount;
+  
+  recalculateLedgerFromHistory(c);
+  localStorage.setItem("premium_tali_customers", JSON.stringify(customers));
+  document.getElementById("historyEditModal").style.display = "none";
+  refreshActiveLayouts();
+}
+
+function deleteHistoryItem(custId, index) {
+  if(!confirm("লেনদেনটি ডিলিট করতে চান?")) return;
+  const c = customers.find(x => x.id == custId);
+  if(!c || !c.history[index]) return;
+  c.history.splice(index, 1);
+  recalculateLedgerFromHistory(c);
+  localStorage.setItem("premium_tali_customers", JSON.stringify(customers));
+  refreshActiveLayouts();
+}
+
+function recalculateLedgerFromHistory(customer) {
+  let initialTotal = 0, initialPaid = 0;
+  customer.history.forEach(h => {
+    if(h.isCollection && h.amount) initialPaid += h.amount;
+    else if(h.isBakiInvoice && h.amount) initialTotal += h.amount;
+  });
+  customer.total = initialTotal;
+  customer.paid = initialPaid;
+  customer.remaining = customer.total - customer.paid;
+}
+
+function refreshActiveLayouts() {
+  if(document.getElementById("list").style.display === "block") loadCustomerCards(customers, "customerLayout");
+  if(document.getElementById("unpaid").style.display === "block") loadCustomerCards(customers.filter(c => c.remaining > 0), "unpaidLayout");
+  updateLiveCounters();
+}
+
+function loadCustomerCards(dataList, containerId) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = dataList.length === 0 ? `<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px;">কোনো ডেটা পাওয়া যায়নি।</div>` : "";
+  
+  dataList.forEach(c => {
+    let historyRowsHtml = "";
+    if(c.history && c.history.length > 0) {
+      c.history.forEach((h, idx) => {
+        historyRowsHtml += `
+          <div class="history-item">
+            <div><span>🕒 ${h.time}</span> — <b>${h.note}</b></div>
+            <div class="history-actions">
+              <button class="hist-btn" onclick="openEditHistoryModal(${c.id}, ${idx})">✏️</button>
+              <button class="hist-btn" style="color:var(--danger)" onclick="deleteHistoryItem(${c.id}, ${idx})">🗑️</button>
+            </div>
+          </div>`;
+      });
+    } else {
+      historyRowsHtml = `<div style="font-size:11px; text-align:center; padding:6px;">ইতিহাস খালি।</div>`;
+    }
+
+    container.innerHTML += `
+      <div class="customer-card" onclick="toggleActionExpansionPanel(${c.id}, event)">
+        <div class="card-header">
+          <div>
+            <b style="font-size:14px;">${c.name}</b>
+            <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">📱 ${c.mobile || 'নেই'} | 📍 ${c.address}</div>
+          </div>
+          <span class="${c.remaining > 0 ? 'baki-tag' : 'baki-tag paid'}">${c.remaining > 0 ? c.remaining + ' ৳ বাকি' : 'পরিশোধিত'}</span>
+        </div>
+        <div style="font-size:11px; color:var(--text-muted); display:flex; justify-content:space-between; border-top:1px solid var(--border-color); padding-top:5px;">
+          <span>মোট বিল: ${c.total} ৳</span> <span>মোট জমা: ${c.paid} ৳</span> <span>তারিখ: ${convertToBanglaDate(c.date)}</span>
+        </div>
+        <div class="action-expansion-panel" id="action_panel_${c.id}">
+          <div class="action-btn-grid">
+            <button class="act-btn highlight-cash" onclick="openCollectionModal(${c.id})"><span>💵</span>জমা নিন</button>
+            <button class="act-btn highlight-history" onclick="toggleHistorySubView(${c.id})"><span>📜</span>ইতিহাস</button>
+            <button class="act-btn" onclick="toggleManagementSubView(${c.id})"><span>⚙️</span>ম্যানেজ</button>
+          </div>
+          <div class="history-panel" id="history_box_${c.id}" style="display:none;">${historyRowsHtml}</div>
+          <div class="management-options-box" id="mgmt_box_${c.id}" style="display:none;">
+            <div class="mgmt-sub-btn" style="color:var(--accent);" onclick="editCustomerLedger(${c.id})">✏️ এডিট</div>
+            <div class="mgmt-sub-btn" style="color:#25D366;" onclick="sendBakiReminder(${c.id})">💬 তাগাদা</div>
+            <div class="mgmt-sub-btn" style="color:#1d4ed8;" onclick="downloadStatement(${c.id})">🖨️ প্রিন্ট</div>
+            <div class="mgmt-sub-btn" style="color:var(--danger); grid-column: span 3;" onclick="deleteCustomerLedger(${c.id})">🗑️ সম্পূর্ণ খাতা মুছুন</div>
+          </div>
+        </div>
+      </div>`;
+  });
+}
+
+function editCustomerLedger(id) {
+  const c = customers.find(x => x.id == id); if(!c) return;
+  document.getElementById("editingCustomerId").value = c.id;
+  document.getElementById("nameInput").value = c.name;
+  document.getElementById("addressInput").value = c.address;
+  document.getElementById("mobileInput").value = c.mobile || "";
+  document.getElementById("totalInput").value = c.total;
+  document.getElementById("paidInput").value = c.paid;
+  document.getElementById("custOpeningDate").value = c.date || todayStr;
+  document.getElementById("customerFormTitle").innerText = "✏️ কাস্টমার খাতা সংশোধন";
+  document.getElementById("btnCancelCustEdit").style.display = "inline-flex";
+  openPage('add', '➕ খাতা এডিট ফরম');
+}
+
+function deleteCustomerLedger(id) {
+  if(confirm("সম্পূর্ণ খাতাটি ডিলিট করতে চান?")) {
+    customers = customers.filter(x => x.id != id);
+    localStorage.setItem("premium_tali_customers", JSON.stringify(customers));
+    refreshActiveLayouts();
+  }
+}
+
+// জমা মডাল
+function openCollectionModal(id) {
+  const c = customers.find(x => x.id == id); if(!c) return;
+  document.getElementById("modalCustId").value = c.id;
+  document.getElementById("modalCustName").value = c.name;
+  document.getElementById("modalCollDate").value = todayStr;
+  document.getElementById("modalCollAmount").value = c.remaining;
+  document.getElementById("collectionModal").style.display = "flex";
+}
+
+function closeCollectionModal() { document.getElementById("collectionModal").style.display = "none"; }
+
+function submitBakiMoneyModal() {
+  const id = document.getElementById("modalCustId").value;
+  const dateVal = document.getElementById("modalCollDate").value;
+  const amount = parseInt(document.getElementById("modalCollAmount").value) || 0;
+  
+  if(!dateVal || amount <= 0) { alert("সঠিক তথ্য দিন!"); return; }
+  const c = customers.find(x => x.id == id); if(!c) return;
+  
+  if(!c.history) c.history = [];
+  c.history.push({ time: convertToBanglaDate(dateVal), note: `💵 নগদ কালেকশন: +${amount}৳`, isCollection: true, collDate: dateVal, amount: amount });
+  recalculateLedgerFromHistory(c);
+  localStorage.setItem("premium_tali_customers", JSON.stringify(customers));
+  closeCollectionModal(); refreshActiveLayouts();
+}
+
+function renderDailyCollectionReport() {
+  const targetDate = document.getElementById("collectionSearchDate").value;
+  const container = document.getElementById("dailyCollectionsLayout"); container.innerHTML = "";
+  let dayTotal = 0;
+  
+  customers.forEach(c => {
+    if(c.history) {
+      c.history.forEach(h => {
+        if(h.isCollection && h.collDate === targetDate) {
+          dayTotal += h.amount;
+          container.innerHTML += `
+            <div class="customer-card" style="border-left:4px solid var(--success)">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div><b>👤 ${c.name}</b><br><small>তারিখ: ${h.time}</small></div>
+                <span style="color:var(--success); font-weight:800;">+ ${h.amount} ৳</span>
+              </div>
+            </div>`;
+        }
+      });
+    }
+  });
+  document.getElementById("collReportTitle").innerText = `${convertToBanglaDate(targetDate)} তারিখের মোট আদায় রিপোর্ট`;
+  if(dayTotal === 0) container.innerHTML = `<div style="text-align:center; padding:15px; color:var(--text-muted);">এই তারিখে কোনো কালেকশন নেই।</div>`;
+}
+
+function renderBakiCollectionReport() {
+  const targetDate = document.getElementById("bakiSearchDate").value;
+  const container = document.getElementById("bakiCollectionsLayout"); container.innerHTML = "";
+  let bakiTotal = 0;
+  
+  customers.forEach(c => {
+    if(c.history) {
+      c.history.forEach(h => {
+        if(h.isBakiInvoice && h.bakiDate === targetDate) {
+          bakiTotal += h.amount;
+          container.innerHTML += `
+            <div class="customer-card" style="border-left:4px solid var(--danger)">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div><b>👤 ${c.name}</b><br><small>মেমো নং: ${h.memoId || 'N/A'}</small></div>
+                <span style="color:var(--danger); font-weight:800;">+ ${h.amount} ৳ বাকি</span>
+              </div>
+            </div>`;
+        }
+      });
+    }
+  });
+  document.getElementById("bakiReportTitle").innerText = `${convertToBanglaDate(targetDate)} তারিখের নতুন বাকির তালিকা`;
+  if(bakiTotal === 0) container.innerHTML = `<div style="text-align:center; padding:15px; color:var(--text-muted);">এই তারিখে মেমো থেকে কোনো বাকি পড়েনি।</div>`;
+}
+
+function renderTagadaList() {
+  const container = document.getElementById("tagadaLayout"); container.innerHTML = "";
+  const bakiCustomers = customers.filter(c => c.remaining > 0);
+  if(bakiCustomers.length === 0) { container.innerHTML = `<div style="text-align:center; padding:15px; color:var(--text-muted);">বাকি খাতা খালি।</div>`; return; }
+  bakiCustomers.forEach(c => {
+    container.innerHTML += `
+      <div class="customer-card" style="border-left:4px solid var(--accent);">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div><b>👤 ${c.name}</b><br><span style="color:var(--danger); font-weight:700;">বকেয়া: ${c.remaining} ৳</span></div>
+          <button class="btn" style="background:#25D366; color:white;" onclick="sendBakiReminder(${c.id})">💬 তাগাদা</button>
+        </div>
+      </div>`;
+  });
+}
+
+function sendBakiReminder(id) {
+  const c = customers.find(x => x.id == id); if(!c) return;
+  const message = `সম্মানিত ${c.name},\nবগুড়ার মিঠাই দোকান হতে আপনার বকেয়া বাকী হিসাবের পরিমাণ ${c.remaining} টাকা। অনুগ্রহ করে বকেয়া পরিশোধ করার জন্য অনুরোধ করা হলো। ধন্যবাদ!`;
+  window.open(`https://api.whatsapp.com/send?phone=${c.mobile ? '88'+c.mobile : ''}&text=${encodeURIComponent(message)}`, '_blank');
+}
+
+function downloadStatement(id) {
+  const c = customers.find(x => x.id == id); if(!c) return;
+  let rows = ""; c.history.forEach(h => { rows += `<tr><td style='border:1px solid #000; padding:6px;'>${h.time}</td><td style='border:1px solid #000; padding:6px;'>${h.note}</td></tr>`; });
+  document.getElementById("printStatementArea").innerHTML = `<h2>বগুড়ার মিঠাই - স্টেটমেন্ট</h2><p>কাস্টমার: ${c.name}</p><p>বাকি: ${c.remaining}৳</p><table style='width:100%; border-collapse:collapse; margin-top:10px;'>${rows}</table>`;
+  window.print();
+}
+
+function saveCustomer() {
+  const date = document.getElementById("custOpeningDate").value;
+  const name = document.getElementById("nameInput").value.trim();
+  const address = document.getElementById("addressInput").value.trim();
+  const mobile = document.getElementById("mobileInput").value.trim();
+  const total = +document.getElementById("totalInput").value || 0;
+  const paid = +document.getElementById("paidInput").value || 0;
+  const editId = document.getElementById("editingCustomerId").value;
+  
+  if(!name) { alert("কাস্টমারের নাম দিন!"); return; }
+  
+  if(editId) {
+    const index = customers.findIndex(x => x.id == editId);
+    if(index !== -1) {
+      customers[index].name = name; customers[index].address = address; customers[index].mobile = mobile; customers[index].date = date;
+      const diffTotal = total - customers[index].total;
+      const diffPaid = paid - customers[index].paid;
+      if(diffTotal !== 0) customers[index].history.push({ time: convertToBanglaDate(todayStr), note: `📝 বিল পরিবর্তন: ${diffTotal > 0 ? '+' : ''}${diffTotal}৳`, isBakiInvoice: true, bakiDate: todayStr, amount: diffTotal });
+      if(diffPaid !== 0) customers[index].history.push({ time: convertToBanglaDate(todayStr), note: `📝 নগদ পরিবর্তন: ${diffPaid > 0 ? '+' : ''}${diffPaid}৳`, isCollection: true, collDate: todayStr, amount: diffPaid });
+      recalculateLedgerFromHistory(customers[index]);
+    }
+  } else {
+    let newCust = { id: Date.now(), date, name, address, mobile, total: 0, paid: 0, remaining: 0, history: [] };
+    newCust.history.push({ time: convertToBanglaDate(date), note: "🆕 নতুন খাতা খোলা হয়েছে" });
+    if(total > 0) newCust.history.push({ time: convertToBanglaDate(date), note: `🔴 প্রাথমিক বকেয়া বাকি`, isBakiInvoice: true, bakiDate: date, amount: total });
+    if(paid > 0) newCust.history.push({ time: convertToBanglaDate(date), note: `💵 প্রাথমিক নগদ জমা`, isCollection: true, collDate: date, amount: paid });
+    recalculateLedgerFromHistory(newCust); customers.push(newCust);
+  }
+  localStorage.setItem("premium_tali_customers", JSON.stringify(customers));
+  resetCustomerForm(); goHome();
+}
+
+function resetCustomerForm() {
+  document.getElementById("editingCustomerId").value = ""; document.getElementById("nameInput").value = ""; document.getElementById("mobileInput").value = "";
+  document.getElementById("addressInput").value = "শেরপুর, বগুড়া"; document.getElementById("totalInput").value = "0"; document.getElementById("paidInput").value = "0";
+  document.getElementById("custOpeningDate").value = todayStr; document.getElementById("customerFormTitle").innerText = "নতুন কাস্টমার খাতা";
+  document.getElementById("btnCancelCustEdit").style.display = "none";
+}
+
+function renderConfiguredItemsList() {
+  const container = document.getElementById("configuredItemsListContainer"); container.innerHTML = "";
+  configuredItems.forEach(i => {
+    container.innerHTML += `
+      <div style="background:var(--card-bg); padding:10px; border-radius:var(--radius-md); margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; border:1px solid var(--border-color);">
+        <div><b>${i.name}</b> - <span style="color:var(--primary); font-weight:700;">${i.price}৳</span></div>
+        <div style="display:flex; gap:4px;">
+          <button class="btn" style="padding:4px 8px; font-size:11px;" onclick="editConfiguredItem(${i.id})">✏️</button>
+          <button class="btn danger" style="padding:4px 8px; font-size:11px;" onclick="deleteConfiguredItem(${i.id})">🗑️</button>
+        </div>
+      </div>`;
+  });
+}
+
+function saveConfiguredItem() {
+  const name = document.getElementById("setupItemName").value.trim();
+  const price = +document.getElementById("setupItemPrice").value || 0;
+  const editId = document.getElementById("editingItemId").value;
+  if(!name || price <= 0) { alert("সঠিক তথ্য দিন!"); return; }
+  if(editId) {
+    const index = configuredItems.findIndex(x => x.id == editId);
+    if(index !== -1) { configuredItems[index].name = name; configuredItems[index].price = price; }
+  } else {
+    configuredItems.push({ id: Date.now(), name, price });
+  }
+  localStorage.setItem("bm_configured_items", JSON.stringify(configuredItems));
+  resetItemSetupForm(); renderConfiguredItemsList();
+}
+
+function editConfiguredItem(id) {
+  const item = configuredItems.find(x => x.id == id); if(!item) return;
+  document.getElementById("editingItemId").value = item.id; document.getElementById("setupItemName").value = item.name;
+  document.getElementById("setupItemPrice").value = item.price; document.getElementById("itemFormTitle").innerText = "✏️ আইটেম সংশোধন";
+  document.getElementById("btnCancelItemEdit").style.display = "inline-flex";
+}
+
+function resetItemSetupForm() {
+  document.getElementById("editingItemId").value = ""; document.getElementById("setupItemName").value = ""; document.getElementById("setupItemPrice").value = "";
+  document.getElementById("itemFormTitle").innerText = "📦 নতুন মিষ্টি ও দই আইটেম যোগ করুন"; document.getElementById("btnCancelItemEdit").style.display = "none";
+}
+
+function deleteConfiguredItem(id) {
+  if(confirm("আইটেমটি কি নিশ্চিত মুছে ফেলতে চান?")) {
+    configuredItems = configuredItems.filter(x => x.id != id);
+    localStorage.setItem("bm_configured_items", JSON.stringify(configuredItems));
+    renderConfiguredItemsList();
+  }
+}
+
+function initInvoiceForm() {
+  document.getElementById("editingInvoiceId").value = "";
+  document.getElementById("invCustomerName").value = ""; document.getElementById("invCustomerMobile").value = ""; document.getElementById("invCustomerAddress").value = "শেরপুর, বগুড়া";
+  document.getElementById("invBusFare").value = "0"; document.getElementById("invGatewaySelect").value = "none"; document.getElementById("chkAddToBaki").checked = false;
+  document.getElementById("invoiceItemRows").innerHTML = ""; selectedCustomerDue = 0;
+  document.getElementById("btnGenerateInvoice").innerText = "🛠️ মেমো জেনারেট করুন";
+  document.getElementById("btnCancelInvoiceEdit").style.display = "none";
+  document.getElementById("memoPreviewBlock").style.display = "none";
+  document.getElementById("shareButtonsArea").style.display = "none";
+  
+  const selector = document.getElementById("invoiceItemQuickSelector");
+  selector.innerHTML = `<option value=""> সিলেক্ট করুন </option>`;
+  configuredItems.forEach(item => {
+    selector.innerHTML += `<option value="${item.name}" data-price="${item.price}">${item.name} (${item.price} ৳)</option>`;
+  });
+  
+  addInvoiceItemRow('', 0, false); 
+  calculateInvoiceTotal();
+  renderInvoiceHistoryLog();
+}
+
+function handleQuickItemSelection(selectEl) {
+  const selectedOption = selectEl.options[selectEl.selectedIndex];
+  const itemName = selectEl.value; 
+  const itemPrice = parseFloat(selectedOption.getAttribute("data-price")) || 0;
+  if(!itemName) return;
+  
+  let emptyRow = null;
+  document.querySelectorAll("#invoiceItemRows tr").forEach(row => {
+    const sel = row.querySelector(".inv-item-select");
+    const custInp = row.querySelector(".custom-item-name");
+    if(sel && !sel.value) { emptyRow = row; }
+    else if(custInp && !custInp.value.trim()) { emptyRow = row; }
+  });
+  
+  if(emptyRow) {
+    const sel = emptyRow.querySelector(".inv-item-select");
+    const custInp = emptyRow.querySelector(".custom-item-name");
+    if(sel) {
+      sel.value = itemName;
+    } else if(custInp) {
+      custInp.value = itemName;
+    }
+    emptyRow.querySelector(".inv-item-price").value = itemPrice;
+  } else {
+    addInvoiceItemRow(itemName, itemPrice, false);
+  }
+  
+  calculateInvoiceTotal(); 
+  selectEl.selectedIndex = 0; 
+}
+
+function addInvoiceItemRow(name = '', price = 0, isCustom = false) {
+  const tbody = document.getElementById("invoiceItemRows"); 
+  const tr = document.createElement("tr");
+  
+  if(!isCustom) {
+    let options = `<option value="">সিলেক্ট করুন</option>`;
+    configuredItems.forEach(i => {
+      let isSel = i.name === name ? "selected" : "";
+      options += `<option value="${i.name}" data-price="${i.price}" ${isSel}>${i.name}</option>`;
+    });
+    tr.innerHTML = `<td><select class="inv-item-select" onchange="autoFillPrice(this)">${options}</select></td>`;
+  } else {
+    tr.innerHTML = `<td><input type="text" class="custom-item-name" value="${name}" placeholder="✍ প্রোডাক্টের নাম"></td>`;
+  }
+  
+  tr.innerHTML += `
+    <td><input type="number" value="1" min="1" class="inv-item-qty" oninput="calculateInvoiceTotal()" style="padding:6px; text-align:center; width:100%; border-radius:6px; border:1px solid var(--border-color);"></td>
+    <td><input type="number" value="${price}" class="inv-item-price" oninput="calculateInvoiceTotal()" style="padding:6px; width:100%; border-radius:6px; border:1px solid var(--border-color);"></td>
+    <td style="text-align:right; font-weight:700;"><span class="row-total">${price}</span>৳</td>
+    <td style="text-align:center;"><button class="btn danger" style="padding:2px 6px; font-size:10px; border-radius:4px;" onclick="removeInvoiceRow(this)">✖</button></td>`;
+  
+  tbody.appendChild(tr);
+  calculateInvoiceTotal();
+}
+
+function removeInvoiceRow(button) {
+  button.closest("tr").remove();
+  calculateInvoiceTotal();
+}
+
+function autoFillPrice(select) {
+  const price = select.options[select.selectedIndex].getAttribute("data-price") || 0;
+  select.closest("tr").querySelector(".inv-item-price").value = price;
+  calculateInvoiceTotal();
+}
+
+function calculateInvoiceTotal() {
+  let subtotal = 0;
+  document.querySelectorAll("#invoiceItemRows tr").forEach(row => {
+    const qty = +row.querySelector(".inv-item-qty").value || 0;
+    const price = +row.querySelector(".inv-item-price").value || 0;
+    const total = qty * price; 
+    row.querySelector(".row-total").innerText = total; 
+    subtotal += total;
+  });
+  
+  const busFare = +document.getElementById("invBusFare").value || 0;
+  const gatewaySelect = document.getElementById("invGatewaySelect");
+  const gatewayRate = +gatewaySelect.options[gatewaySelect.selectedIndex].getAttribute("data-rate") || 0;
+  const gatewayCharge = Math.round(subtotal * gatewayRate);
+  
+  document.getElementById("invItemSubtotal").innerText = subtotal;
+  document.getElementById("lblBusFareText").innerText = busFare;
+  document.getElementById("lblGatewayText").innerText = gatewayCharge;
+  document.getElementById("lblPrevDueText").innerText = selectedCustomerDue;
+  
+  const grandTotal = subtotal + busFare + gatewayCharge + selectedCustomerDue;
+  document.getElementById("invGrandTotal").innerText = grandTotal;
+}
+
+function buildAndShowMemo() {
+  const name = document.getElementById("invCustomerName").value.trim();
+  const mobile = document.getElementById("invCustomerMobile").value.trim();
+  const address = document.getElementById("invCustomerAddress").value.trim();
+  const invDate = document.getElementById("invDate").value;
+  const isBakiChecked = document.getElementById("chkAddToBaki").checked;
+  const editId = document.getElementById("editingInvoiceId").value;
+  
+  if(!name) { alert("👑 ক্রেতার নাম দিন!"); return; }
+  
+  let memoId = editId ? editId : "BM" + Math.floor(1000 + Math.random() * 9000);
+  
+  document.getElementById("lblMemoName").innerText = name;
+  document.getElementById("lblMemoMobile").innerText = mobile || "নেই";
+  document.getElementById("lblMemoAddress").innerText = address || "শেরপুর, বগুড়া";
+  document.getElementById("lblMemoDate").innerText = convertToBanglaDate(invDate);
+  document.getElementById("lblMemoId").innerText = memoId;
+  
+  const memoRows = document.getElementById("lblMemoRows"); 
+  memoRows.innerHTML = "";
+  let itemsArray = [];
+  
+  document.querySelectorAll("#invoiceItemRows tr").forEach(row => {
+    let selectEl = row.querySelector(".inv-item-select");
+    let customInp = row.querySelector(".custom-item-name");
+    let itemName = selectEl ? selectEl.value : (customInp ? customInp.value.trim() : "");
+    
+    if(!itemName) return;
+    const qty = +row.querySelector(".inv-item-qty").value || 1;
+    const price = +row.querySelector(".inv-item-price").value || 0;
+    
+    itemsArray.push({ name: itemName, qty, price });
+    memoRows.innerHTML += `
+      <tr onclick="triggerDirectMemoEdit()">
+        <td><b>${itemName}</b></td>
+        <td style="text-align:center;">${qty}</td>
+        <td style="text-align:right;">${price} ৳</td>
+        <td style="text-align:right; font-weight:700;">${qty*price} ৳</td>
+      </tr>`;
+  });
+  
+  if(itemsArray.length === 0) { alert("কমপক্ষে ১টি পণ্য যুক্ত করুন!"); return; }
+
+  const subtotal = +document.getElementById("invItemSubtotal").innerText;
+  const busFare = +document.getElementById("invBusFare").value;
+  const gatewaySelect = document.getElementById("invGatewaySelect").value;
+  const gatewayCharge = +document.getElementById("lblGatewayText").innerText;
+  const finalGrandTotal = +document.getElementById("invGrandTotal").innerText;
+  
+  document.getElementById("lblMemoSubtotal").innerText = subtotal;
+  
+  if(busFare > 0){
+    document.getElementById("memoBusFareRow").style.display = "flex";
+    document.getElementById("lblMemoBusFare").innerText = busFare;
+  } else document.getElementById("memoBusFareRow").style.display = "none";
+  
+  if(gatewayCharge > 0){
+    document.getElementById("memoGatewayRow").style.display = "flex";
+    document.getElementById("lblMemoGatewayName").innerText = gatewaySelect;
+    document.getElementById("lblMemoGateway").innerText = gatewayCharge;
+  } else document.getElementById("memoGatewayRow").style.display = "none";
+  
+  if(selectedCustomerDue > 0) {
+    document.getElementById("memoPrevDueRow").style.display = "flex";
+    document.getElementById("lblMemoPrevDue").innerText = selectedCustomerDue;
+  } else {
+    document.getElementById("memoPrevDueRow").style.display = "none";
+  }
+  
+  document.getElementById("lblMemoGrand").innerText = finalGrandTotal;
+
+  if(editId) {
+    invoiceHistory = invoiceHistory.filter(x => x.memoId !== editId);
+    customers.forEach(c => {
+      if(c.history) {
+        c.history = c.history.filter(h => h.memoId !== editId);
+        recalculateLedgerFromHistory(c);
+      }
+    });
+  }
+
+  let invoiceObject = {
+    memoId, date: invDate, name, mobile, address, items: itemsArray, busFare, gatewaySelect, gatewayCharge, finalGrandTotal, isBaki: isBakiChecked
+  };
+  invoiceHistory.unshift(invoiceObject);
+  localStorage.setItem("bm_invoice_history", JSON.stringify(invoiceHistory));
+  
+  if(isBakiChecked) {
+    const currentInvoiceBakiAmount = subtotal + busFare + gatewayCharge;
+    let existingCust = customers.find(c => c.name.toLowerCase() === name.toLowerCase() || (mobile && c.mobile === mobile));
+    
+    if(existingCust) {
+      if(!existingCust.history) existingCust.history = [];
+      existingCust.history.push({ time: convertToBanglaDate(invDate), note: `🔴 মেমো #${memoId} হতে বকেয়া বাকি: +${currentInvoiceBakiAmount}৳`, isBakiInvoice: true, bakiDate: invDate, amount: currentInvoiceBakiAmount, memoId: memoId });
+      recalculateLedgerFromHistory(existingCust);
+    } else {
+      let newCust = {
+        id: Date.now(), date: invDate, name: name, address: address || "শেরপুর, বগুড়া", mobile: mobile, total: 0, paid: 0, remaining: 0,
+        history: [
+          { time: convertToBanglaDate(invDate), note: "🆕 মেমো থেকে নতুন খাতা তৈরি" },
+          { time: convertToBanglaDate(invDate), note: `🔴 মেমো #${memoId} হতে বকেয়া বাকি: +${currentInvoiceBakiAmount}৳`, isBakiInvoice: true, bakiDate: invDate, amount: currentInvoiceBakiAmount, memoId: memoId }
+        ]
+      };
+      recalculateLedgerFromHistory(newCust); customers.push(newCust);
+    }
+    localStorage.setItem("premium_tali_customers", JSON.stringify(customers));
+    updateLiveCounters();
+    let reFetched = customers.find(c => c.name.toLowerCase() === name.toLowerCase() || (mobile && c.mobile === mobile));
+    selectedCustomerDue = reFetched ? reFetched.remaining : currentInvoiceBakiAmount;
+    document.getElementById("lblPrevDueText").innerText = selectedCustomerDue;
+  }
+  
+  document.getElementById("memoQrCode").innerHTML = "";
+  new QRCode(document.getElementById("memoQrCode"), { text: "https://www.bogurarmithai.com", width: 50, height: 50 });
+  
+  document.getElementById("memoPreviewBlock").style.display = "block";
+  document.getElementById("shareButtonsArea").style.display = "flex";
+  document.getElementById("memoPreviewBlock").scrollIntoView({ behavior: 'smooth' });
+  
+  renderInvoiceHistoryLog();
+}
+
+function triggerDirectMemoEdit() {
+  const currentMemoId = document.getElementById("lblMemoId").innerText;
+  if(currentMemoId && currentMemoId !== "-") {
+    editInvoiceFromLog(currentMemoId);
+    document.getElementById("invoice").scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+function renderInvoiceHistoryLog() {
+  const container = document.getElementById("invoiceHistoryLayout");
+  container.innerHTML = invoiceHistory.length === 0 ? `<div style="text-align:center; padding:15px; color:var(--text-muted); font-size:12px;">এখনো কোনো মেমো জেনারেট করা হয়নি।</div>` : "";
+  
+  invoiceHistory.forEach(inv => {
+    let itemsSummaryText = inv.items.map(i => `${i.name} (${i.qty}টি)`).join(', ');
+    container.innerHTML += `
+      <div class="customer-card" style="border-left: 4px solid var(--primary); animation: slideDown 0.2s ease-out;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <div>
+            <b style="font-size:13px; color:var(--primary);">🧾 মেমো নং: ${inv.memoId}</b>
+            <div style="font-size:12px; font-weight:700; margin-top:3px;">👤 ক্রেতা: ${inv.name} (${inv.mobile || 'নেই'})</div>
+            <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">📦 পণ্য: ${itemsSummaryText}</div>
+            <div style="font-size:11px; color:var(--text-muted);">📅 তারিখ: ${convertToBanglaDate(inv.date)} | ${inv.isBaki ? '🔴 বাকি খাতা' : '🟢 ক্যাশ পেমেন্ট'}</div>
+          </div>
+          <div style="text-align:right;">
+            <span style="font-weight:800; color:var(--text-dark); font-size:14px;">${inv.finalGrandTotal} ৳</span>
+            <div style="margin-top:8px; display:flex; gap:4px; justify-content:flex-end;">
+              <button class="hist-btn" onclick="editInvoiceFromLog('${inv.memoId}')">✏️ এডিট</button>
+              <button class="hist-btn" style="color:var(--danger)" onclick="deleteInvoiceFromLog('${inv.memoId}')">🗑️ মুছুন</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  });
+}
+
+function editInvoiceFromLog(memoId) {
+  const inv = invoiceHistory.find(x => x.memoId === memoId);
+  if(!inv) return;
+  
+  document.getElementById("editingInvoiceId").value = inv.memoId;
+  document.getElementById("invCustomerName").value = inv.name;
+  document.getElementById("invCustomerMobile").value = inv.mobile;
+  document.getElementById("invCustomerAddress").value = inv.address;
+  document.getElementById("invDate").value = inv.date;
+  document.getElementById("invBusFare").value = inv.busFare;
+  document.getElementById("invGatewaySelect").value = inv.gatewaySelect;
+  document.getElementById("chkAddToBaki").checked = inv.isBaki;
+  
+  const tbody = document.getElementById("invoiceItemRows");
+  tbody.innerHTML = "";
+  
+  inv.items.forEach(item => {
+    const isConfigured = configuredItems.some(c => c.name === item.name);
+    const tr = document.createElement("tr");
+    
+    if(isConfigured) {
+      let options = `<option value="">সিলেক্ট করুন</option>`;
+      configuredItems.forEach(i => {
+        let selected = i.name === item.name ? "selected" : "";
+        options += `<option value="${i.name}" data-price="${i.price}" ${selected}>${i.name}</option>`;
+      });
+      tr.innerHTML = `<td><select class="inv-item-select" onchange="autoFillPrice(this)">${options}</select></td>`;
+    } else {
+      tr.innerHTML = `<td><input type="text" class="custom-item-name" value="${item.name}"></td>`;
+    }
+    
+    tr.innerHTML += `
+      <td><input type="number" value="${item.qty}" min="1" class="inv-item-qty" oninput="calculateInvoiceTotal()" style="padding:6px; text-align:center; width:100%; border-radius:6px; border:1px solid var(--border-color);"></td>
+      <td><input type="number" value="${item.price}" class="inv-item-price" oninput="calculateInvoiceTotal()" style="padding:6px; width:100%; border-radius:6px; border:1px solid var(--border-color);"></td>
+      <td style="text-align:right; font-weight:700;"><span class="row-total">${item.qty * item.price}</span>৳</td>
+      <td style="text-align:center;"><button class="btn danger" style="padding:2px 6px; font-size:10px; border-radius:4px;" onclick="removeInvoiceRow(this)">✖</button></td>`;
+    tbody.appendChild(tr);
+  });
+  
+  let cust = customers.find(c => c.name.toLowerCase() === inv.name.toLowerCase());
+  selectedCustomerDue = cust ? cust.remaining : 0;
+  
+  if(inv.isBaki && cust) {
+    let memoBakiComponent = inv.items.reduce((sum, i)=> sum + (i.qty * i.price), 0) + inv.busFare + inv.gatewayCharge;
+    selectedCustomerDue = Math.max(0, selectedCustomerDue - memoBakiComponent);
+  }
+
+  calculateInvoiceTotal();
+  
+  document.getElementById("btnGenerateInvoice").innerText = "💾 মেমো আপডেট করুন";
+  document.getElementById("btnCancelInvoiceEdit").style.display = "inline-flex";
+}
+
+function deleteInvoiceFromLog(memoId) {
+  if(confirm(`আপনি কি নিশ্চিতভাবে মেমো #${memoId} হিস্ট্রি ও খাতা থেকে মুছে ফেলতে চান?`)) {
+    invoiceHistory = invoiceHistory.filter(x => x.memoId !== memoId);
+    localStorage.setItem("bm_invoice_history", JSON.stringify(invoiceHistory));
+    
+    customers.forEach(c => {
+      if(c.history) {
+        c.history = c.history.filter(h => h.memoId !== memoId);
+        recalculateLedgerFromHistory(c);
+      }
+    });
+    localStorage.setItem("premium_tali_customers", JSON.stringify(customers));
+    
+    initInvoiceForm();
+    updateLiveCounters();
+    alert("মেমোটি সফলভাবে ডিলিট করা হয়েছে।");
+  }
+}
+
+/* নতুন সংযোজিত অপশন ১: হোয়াটসঅ্যাপে সরাসরি টেক্সট ডিটেইলস পাঠানো */
+function sendMemoAsTextWhatsapp() {
+  const name = document.getElementById("lblMemoName").innerText;
+  const mobile = document.getElementById("invCustomerMobile").value.trim();
+  const memoId = document.getElementById("lblMemoId").innerText;
+  const dateStr = document.getElementById("lblMemoDate").innerText;
+  const grandTotal = document.getElementById("lblMemoGrand").innerText;
+  const subTotal = document.getElementById("lblMemoSubtotal").innerText;
+  
+  let productText = "";
+  document.querySelectorAll("#invoiceItemRows tr").forEach(row => {
+    let selectEl = row.querySelector(".inv-item-select");
+    let customInp = row.querySelector(".custom-item-name");
+    let itemName = selectEl ? selectEl.value : (customInp ? customInp.value.trim() : "");
+    if(itemName) {
+      const qty = row.querySelector(".inv-item-qty").value;
+      const price = row.querySelector(".inv-item-price").value;
+      productText += `\n▪️ ${itemName} (${qty}টি x ${price}৳) = ${qty*price}৳`;
+    }
+  });
+
+  const message = `*বগুড়ার মিঠাই — ক্যাশ মেমো* 🧾\n-------------------------------\n*মেমো নং:* ${memoId}\n*তারিখ:* ${dateStr}\n*কাস্টমার:* ${name}\n\n*পণ্যসমূহ:*${productText}\n-------------------------------\n*আইটেম মোট:* ${subTotal} ৳\n*সর্বমোট প্রদেয় বিল:* ${grandTotal} ৳\n\nআমাদের থেকে কেনাকাটা করার জন্য ধন্যবাদ! ✨`;
+  
+  window.open(`https://api.whatsapp.com/send?phone=${mobile ? '88'+mobile : ''}&text=${encodeURIComponent(message)}`, '_blank');
+}
+
+/* নতুন সংযোজিত অপশন ২: ফাইল শেয়ারিং ছাড়াই গ্যালারি/ডাউনলোড ফোল্ডারে মেমো ইমেজ ডাউনলোড */
+function downloadMemoAsImageOnly() {
+  const target = document.getElementById("memoPreviewBlock");
+  const customerName = document.getElementById("lblMemoName").innerText || "গ্রাহক";
+  const memoNo = document.getElementById("lblMemoId").innerText || "0000";
+
+  html2canvas(target, { 
+    scale: 2,
+    useCORS: true,
+    allowTaint: true,
+    backgroundColor: window.getComputedStyle(target).backgroundColor 
+  }).then(canvas => {
+    // সরাসরি ব্রাউজার ডাউনলোডের সহজ লিঙ্ক তৈরি
+    const link = document.createElement("a");
+    link.download = `Memo_${memoNo}_${customerName}.jpg`;
+    link.href = canvas.toDataURL("image/jpeg", 0.95);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    alert("মেমোটি ছবি হিসেবে আপনার মোবাইলের Download ফোল্ডারে সেভ হয়েছে! এবার হোয়াটসঅ্যাপে গিয়ে কাস্টমারকে পাঠিয়ে দিন।");
+  }).catch(err => {
+    alert("ছবি তৈরি করতে সমস্যা হচ্ছে! অনুগ্রহ করে স্ক্রিনশট নিন।");
+    console.error(err);
+  });
+}
+</script>
+</body>
+</html>
